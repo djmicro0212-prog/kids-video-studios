@@ -1,1 +1,85 @@
-Daily kids videos
+yaml
+name: Daily kids videos
+
+on:
+  schedule:
+    - cron: "15 5 * * *"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "How many videos (blank = config.yaml)"
+        required: false
+      format:
+        description: "Force a format: song, story, learning or bedtime (blank = rotate)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-videos
+  cancel-in-progress: false
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          pip install -r requirements.txt
+
+      - name: Make today's videos
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          ASSET_BASE_URL: https://github.com/${{ github.repository }}/releases/download/videos-${{ github.run_id }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.count }}" ]; then ARGS="$ARGS --count ${{ inputs.count }}"; fi
+          if [ -n "${{ inputs.format }}" ]; then ARGS="$ARGS --format ${{ inputs.format }}"; fi
+          python make_videos.py $ARGS
+
+      - name: Publish videos for review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DAY=$(ls output | sort | tail -1)
+          cd output/$DAY
+          python - <<'EOF' > notes.md
+          import json
+          m = json.load(open("manifest.json"))
+          print(f"## Videos for {m['date']}\n")
+          for v in m["videos"]:
+              print(f"- **{v['title']}** ({v['format']}, {v['seconds']}s) - posts {v['post_time']} UK\n  {v['url']}")
+          print("\nThese are picked up by the daily Claude task and added to Metricool as drafts for you to approve.")
+          EOF
+          gh release create "videos-${{ github.run_id }}" *.mp4 *.png manifest.json \
+            --title "Videos $DAY" --notes-file notes.md --latest
+
+      - name: Save history (avoids repeating ideas)
+        run: |
+          git config user.name "kids-video-bot"
+          git config user.email "kids-video-bot@users.noreply.github.com"
+          git add history.json
+          git commit -m "History update $(date +%F)" || echo "nothing to commit"
+          git push
+
+      - name: Delete releases older than 14 days (saves space)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CUTOFF=$(date -d '14 days ago' +%s)
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq '.[] | select(.tagName | startswith("videos-")) | "\(.tagName) \(.createdAt)"' |
+          while read TAG CREATED; do
+            if [ $(date -d "$CREATED" +%s) -lt $CUTOFF ]; then gh release delete "$TAG" --yes --cleanup-tag; fi
+          done
