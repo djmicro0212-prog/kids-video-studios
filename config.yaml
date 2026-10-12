@@ -1,0 +1,46 @@
+# Kids Video Studio settings. Edit these, commit, and the next daily run uses them.
+
+channel_name: "Your Channel Name"     # used in descriptions; change to your channel's name
+videos_per_day: 2                         # 1-6. Each video costs roughly $0.35-0.50 (see SETUP.md)
+target_seconds: [60, 120]                 # each video lands somewhere in this range
+
+# Formats rotate so the channel doesn't look mass-produced.
+formats:
+  - song        # an original sung nursery-rhyme style song
+  - story       # a short narrated animated story
+  - learning    # ABCs, numbers, colours, shapes, animals - narrated with a little chant
+  - bedtime     # a calm, slow bedtime story
+
+art_style: >-
+  soft 2D storybook illustration, rounded friendly shapes, warm pastel colours,
+  gentle textured paper look, big expressive eyes, simple clean backgrounds,
+  no text or letters in the image
+
+# Google Gemini models (one API key covers all three)
+models:
+  script: gemini-2.5-flash
+  image: gemini-2.5-flash-image
+  tts: gemini-2.5-flash-preview-tts
+narrator_voice: Sulafat                   # a warm Gemini voice; others: Kore, Achernar, Leda
+bedtime_voice: Achernar
+
+# fal.ai music (sung songs and soft background music)
+music:
+  model: fal-ai/minimax-music/v2          # sung songs with your lyrics
+  style_song: "cheerful children's nursery song, ukulele, glockenspiel, light hand claps, bright friendly children's choir, simple catchy melody, 100 BPM"
+  style_bed: "gentle playful instrumental for kids, soft ukulele and xylophone, no vocals"
+  style_bedtime_bed: "soft lullaby instrumental, music box and warm strings, slow and calm, no vocals"
+  bed_volume: 0.18                        # background music level under narration (0-1)
+
+# Video
+width: 1080
+height: 1920                              # vertical: posts as a YouTube Short (Shorts can run up to 3 minutes)
+fps: 30
+captions: true                            # big sing-along/read-along captions at the bottom
+
+# Posting (picked up by the daily Claude scheduled task, see SETUP.md)
+posting:
+  times: ["16:00", "18:00", "09:00", "12:00", "14:00", "19:00"]   # UK time slots, used in order
+  timezone: Europe/London
+  made_for_kids: true
+  ai_generated_disclosure: false          # YouTube only requires this for realistic AI content; set true if unsure
