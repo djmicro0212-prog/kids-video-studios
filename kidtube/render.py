@@ -43,12 +43,12 @@ MOVES = [
 def caption_png(text, w, h, out_path):
     """Big, centred, outlined caption on a transparent layer (one line per lyric line)."""
     from PIL import Image, ImageDraw, ImageFont
-    size = int(w * 0.064)
+    size = int(w * 0.052)
     fnt = ImageFont.truetype(font(), size)
     lines = []
     for part in text.split("\n"):
-        lines += textwrap.wrap(part, 22)
-    lines = lines[:5]
+        lines += textwrap.wrap(part, 30)
+    lines = lines[:8]
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     gap = int(size * 1.25)
