@@ -18,9 +18,9 @@ art_style: >-
 
 # Google Gemini models (one API key covers all three)
 models:
-  script: gemini-2.5-flash
-  image: gemini-2.5-flash-image
-  tts: gemini-2.5-flash-preview-tts
+  script: gemini-3.8-flash
+     image: gemini-nano-banana-2.1
+     tts: gemini-3.8-flash-tts
 narrator_voice: Sulafat                   # a warm Gemini voice; others: Kore, Achernar, Leda
 bedtime_voice: Achernar
 
