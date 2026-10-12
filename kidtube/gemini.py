@@ -43,7 +43,7 @@ def _parts(resp):
 def generate_json(model, prompt, temperature=1.0):
     body = {
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        "generationConfig": {"responseMimeType": "application/json", "temperature": temperature},
+        "generationConfig": {"responseMimeType": "application/json"},
     }
     text = "".join(p.get("text", "") for p in _parts(_call(model, body)))
     return json.loads(text)
